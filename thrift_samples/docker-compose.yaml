@@ -1,0 +1,24 @@
+version: '3.6'
+services:
+  thrift-playground:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+      args: 
+        BASE_IMAGE: jupyter/base-notebook
+    ports:
+      - 1234:8888
+  thrift-playground-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+      args: 
+        BASE_IMAGE: jupyter/base-notebook
+    ports:
+      - 1235:8888
+    volumes: 
+      - ./docker:/home/jovyan/docker
+      - ./notebooks:/home/jovyan/notebooks
+      - ./thrift:/home/jovyan/thrift
