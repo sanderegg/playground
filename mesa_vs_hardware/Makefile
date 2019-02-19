@@ -1,4 +1,5 @@
 NETWORK_ADAPTER=wlp0s20f3
+export HOST="10.43.105.150"
 
 up: down
 	docker-compose -f docker-compose.yaml up

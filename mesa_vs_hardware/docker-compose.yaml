@@ -4,7 +4,7 @@ services:
     image: kitware/paraviewweb:pvw-egl-demo-v5.6.0
     ports: 
       - 8888:80
-    command: "ws://10.43.105.150:8888"
+    command: "ws://${HOST}:8888"
     runtime: nvidia
     volumes: 
       - /home/scu/Downloads:/data
@@ -12,7 +12,7 @@ services:
     image: kitware/paraviewweb:pvw-osmesa-demo-v5.6.0
     ports: 
       - 8889:80
-    command: "ws://10.43.105.150:8889"    
+    command: "ws://${HOST}:8889"    
     volumes: 
       - /home/scu/Downloads:/data  
   nvsmi:
