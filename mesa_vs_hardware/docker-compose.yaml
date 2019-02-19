@@ -1,0 +1,24 @@
+version: "2.3"
+services:
+  paraview_hardware:
+    image: kitware/paraviewweb:pvw-egl-demo-v5.6.0
+    ports: 
+      - 8888:80
+    command: "ws://10.43.105.150:8888"
+    runtime: nvidia
+    volumes: 
+      - /home/scu/Downloads:/data
+  paraview_mesa:
+    image: kitware/paraviewweb:pvw-osmesa-demo-v5.6.0
+    ports: 
+      - 8889:80
+    command: "ws://10.43.105.150:8889"    
+    volumes: 
+      - /home/scu/Downloads:/data  
+  nvsmi:
+    image: ubuntu:18.04
+    runtime: nvidia
+    environment:
+          - NVIDIA_VISIBLE_DEVICES=all
+    command: nvidia-smi
+  
