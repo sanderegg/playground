@@ -19,7 +19,7 @@ network_loss_and_corruption: network_reset
 	# create loss and corruption
 	sudo tc qdisc add dev ${NETWORK_ADAPTER} root netem loss 10% corrupt 5%
 
-network_limit_bandwith: network_reset
+network_limit_bandwidth: network_reset
 	@echo "Usage: make network_limit_bandwith bandwidth=1mbit"
 	sudo tc qdisc add dev ${NETWORK_ADAPTER} root handle 1:0 htb default 10
 	sudo tc class add dev ${NETWORK_ADAPTER} parent 1:0 classid 1:10 htb rate ${bandwidth}
