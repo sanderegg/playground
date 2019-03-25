@@ -8,12 +8,14 @@
 
 import argparse
 import csv
-from datetime import datetime
 import logging
 import sys
+from datetime import datetime
 from enum import IntEnum
 from pathlib import Path
 from typing import List
+
+from bs4 import BeautifulSoup
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -36,12 +38,12 @@ def convert_entry(input: List[str]) -> List[str]:
     # tag is mandatory since v4.5
     # file:///usr/share/doc/homebank-data/help/index.html
 
-    date = datetime.strptime(input[0], '%Y-%m-%d')
+    date = datetime.strptime(input[0], '%d.%m.%Y')
     amount = 0.0
     if input[2]:
-        amount = amount + float(input[2])
+        amount = amount - float(input[2].replace("'", ""))
     if input[3]:
-        amount = amount + float(input[3])
+        amount = amount + float(input[3].replace("'", ""))
     output = [
         date.strftime('%y-%m-%d'), 
         "0",
@@ -58,21 +60,22 @@ def is_entry(row) -> bool:
     if not row:
         return False
     try:
-        datetime.strptime(row[0], '%Y-%m-%d')
+        datetime.strptime(row[0], '%d-%m-%Y')
         return True
     except ValueError:
         return False
 
 
 def convert_file(input_file: Path, output_file: Path):
-    with Path(input_file).open('r', encoding='iso-8859-1', newline='') as input_fp, \
+    with Path(input_file).open('r', encoding='iso-8859-1') as input_fp,\
         Path(output_file).open('w', newline='', encoding='utf-8') as output_fp:
-        csvreader = csv.reader(input_fp, delimiter=';', quotechar='"')
+
+        soup = BeautifulSoup(input_fp, features="html.parser")
         csvwriter = csv.writer(output_fp, delimiter=';')
-        for row in csvreader:
-            if is_entry(row):
-                converted_row = convert_entry(row)
-                csvwriter.writerow(converted_row)
+        for operation in soup.find_all('tbody'):
+            row = [cell.string.strip() for cell in operation.find_all('td') if cell.string]
+            converted_row = convert_entry(row)
+            csvwriter.writerow(converted_row)
             
 
 def main(args = None) -> int:
