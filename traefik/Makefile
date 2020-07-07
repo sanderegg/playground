@@ -19,3 +19,8 @@ up-simcore:
 
 down-simcore:
 	docker stack rm simcore
+
+up-aws:
+	docker stack deploy -c docker-compose-simcore-aws.yml simcore
+down-aws:
+	docker stack rm simcore
