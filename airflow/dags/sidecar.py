@@ -1,31 +1,35 @@
-import json
-
-from airflow.decorators import dag, task
-from airflow.utils.dates import days_ago
+from airflow import DAG
+from airflow.operators.bash import BashOperator
 from airflow.providers.docker.operators.docker import DockerOperator
-# These args will get passed on to each operator
-# You can override them on a per-task basis during operator initialization
+from airflow.utils.dates import days_ago
+
 default_args = {
-    'owner': 'airflow',
+    "owner": "airflow",
+    "description": "run the sidecar",
+    "start_date": days_ago(2),
 }
-@dag(default_args=default_args, schedule_interval=None, start_date=days_ago(2), tags=['docker'])
-def sidecar():
 
-    @task()
-    def first_task():
-        print("Hello from the first task")
+with DAG("sidecar_dag", default_args=default_args) as dag:
+    t1 = BashOperator(task_id="print_current_date", bash_command="date")
 
-    task_one = first_task()
+    t2 = DockerOperator(
+        task_id="run_sidecar",
+        image="itisfoundation/sidecar:master-github-latest",
+        api_version="auto",
+        force_pull=True,
+        auto_remove=False,
+        command="simcore-service-sidecar --help",
+        network_mode="bridge",
+        volumes=[
+            "airflow_inputs:/home/scu/input",
+            "airflow_outputs:/home/scu/output",
+            "airflow_logs:/home/scu/log",
+            "/var/run/docker.sock:/var/run/docker.sock",
+            "/etc/hostname:/home/scu/hostname:ro",
+        ],
+        environment={},
+    )
 
+    t3 = BashOperator(task_id="print_hello", bash_command='echo "hello world"')
 
-    # docker_task = DockerOperator(api_version='1.19',
-    # docker_url='tcp://localhost:2375',  # Set your docker URL
-    # command='/bin/sleep 30',
-    # image='centos:latest',
-    # network_mode='bridge',
-    # task_id='docker_op_tester',
-    # dag=dag,)
-
-    # task_one >> docker_task
-
-sidecar_dag = sidecar()
+    t1 >> t2 >> t3
