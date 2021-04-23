@@ -8,7 +8,6 @@ from airflow.operators.dummy import DummyOperator
 from airflow.providers.docker.operators.docker import DockerOperator
 from airflow.utils.dates import days_ago
 
-
 log = logging.getLogger(__file__)
 
 default_args = {
@@ -18,10 +17,8 @@ default_args = {
 }
 
 
-
 # def create_computational_pipeline(computational_dag: nx.DiGraph):
-    # for node in nx.topological_sort(computational_dag):
-        
+# for node in nx.topological_sort(computational_dag):
 
 
 def create_comp_task(task_id: str) -> DockerOperator:
@@ -43,8 +40,23 @@ def create_comp_task(task_id: str) -> DockerOperator:
         environment={},
     )
 
-with DAG("templated_dag", default_args=default_args) as dag:
+from airflow.operators.bash import BashOperator
+from airflow.operators.python import PythonOperator
+
+from pprint import pformat
+def extract_dag_run_arguments(**kwargs):
+    print("received pipeline arguments", pformat(kwargs["dag_run"].conf))
+    return kwargs["dag_run"].conf
+
+with DAG(
+    "templated_dag", default_args=default_args, schedule_interval=None, catchup=False
+) as dag:
     start_task = DummyOperator(task_id="start")
+    extract_pipeline_task = PythonOperator(
+            task_id="python_task",
+            python_callable=extract_dag_run_arguments,
+            provide_context=True
+        )
     end_task = DummyOperator(task_id="end")
 
     TEST_VALUE = 4
@@ -56,4 +68,6 @@ with DAG("templated_dag", default_args=default_args) as dag:
         dynamic_task >> end_task
 
 
-    start_task >> end_task
+
+
+    # start_task >> extract_pipeline_task >> end_task
