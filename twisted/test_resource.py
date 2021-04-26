@@ -8,6 +8,6 @@ class Hello(Resource):
         return Resource.getChild(self, name, request)
 
     def render_GET(self, request):
-        return "Hello, world! I am located at {}.".format(request.postpath).encode("utf-8")
+        return "Hello, world! I am test_resource located at {}.".format(request.postpath).encode("utf-8")
 
 resource = Hello()
