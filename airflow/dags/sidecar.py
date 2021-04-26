@@ -4,8 +4,8 @@ from airflow.providers.docker.operators.docker import DockerOperator
 from airflow.utils.dates import days_ago
 
 default_args = {
-    "owner": "airflow",
-    "description": "run the sidecar",
+    "owner": "IT'IS Foundation",
+    "description": "the typical sidecar run",
     "start_date": days_ago(2),
 }
 
