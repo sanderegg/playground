@@ -1,9 +1,9 @@
 import logging
-from datetime import datetime, timedelta
 from typing import Any, Dict, List
 
 # import networkx as nx
 from airflow import DAG
+from airflow.models import Variable
 from airflow.operators.dummy import DummyOperator
 from airflow.providers.docker.operators.docker import DockerOperator
 from airflow.utils.dates import days_ago
@@ -40,34 +40,55 @@ def create_comp_task(task_id: str) -> DockerOperator:
         environment={},
     )
 
-from airflow.operators.bash import BashOperator
-from airflow.operators.python import PythonOperator
 
+import json
+import os
 from pprint import pformat
+
+from airflow.operators.python import PythonOperator
+from airflow import configuration as conf
+from airflow.models import DagBag, TaskInstance
+from airflow import DAG, settings
+
+
+main_dag_id = "oSparc_DAG"
+
+
 def extract_dag_run_arguments(**kwargs):
-    print("received pipeline arguments", pformat(kwargs["dag_run"].conf))
-    return kwargs["dag_run"].conf
+    pipeline_configuration = kwargs["dag_run"].conf
+    print("received pipeline arguments", pformat(pipeline_configuration))
+    log.info("setting airflow variables with workbench configuration")
+    Variable.set(
+        "Workbench",
+        pipeline_configuration["value"],
+    )
+    log.info(
+        "current airflow variable state is: %s",
+        Variable.get("Workbench", default_var=None),
+    )
+
+
+from uuid import uuid4
 
 with DAG(
-    "templated_dag", default_args=default_args, schedule_interval=None, catchup=False
+    main_dag_id, default_args=default_args, schedule_interval=None, catchup=False
 ) as dag:
     start_task = DummyOperator(task_id="start")
-    extract_pipeline_task = PythonOperator(
-            task_id="python_task",
-            python_callable=extract_dag_run_arguments,
-            provide_context=True
-        )
+    extract_comp_pipeline_from_conf_task = PythonOperator(
+        task_id="extract_dagrun_arguments",
+        python_callable=extract_dag_run_arguments,
+        provide_context=True,
+    )
+    start_task >> extract_comp_pipeline_from_conf_task
     end_task = DummyOperator(task_id="end")
 
-    TEST_VALUE = 4
-    log.info("the current test value is %s", TEST_VALUE)
-    for index in range(TEST_VALUE):
-        dynamic_task: DockerOperator = create_comp_task(task_id=f"comp_task_{index}")
+    dynamic_workflow_config = int(Variable.get("Workbench", default_var=0))
+    log.info("TEST: the current configuration value is [%s]", dynamic_workflow_config)
+    for index in range(dynamic_workflow_config):
 
-        start_task >> dynamic_task
+        dynamic_task: DockerOperator = create_comp_task(
+            task_id=f"comp_task.{index}_{uuid4()}"
+        )
+
+        extract_comp_pipeline_from_conf_task >> dynamic_task
         dynamic_task >> end_task
-
-
-
-
-    # start_task >> extract_pipeline_task >> end_task
