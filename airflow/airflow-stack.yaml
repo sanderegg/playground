@@ -67,7 +67,7 @@ services:
     command: scheduler
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - airflow_dags:/opt/airflow/dags
+      - ./dags:/opt/airflow/dags
       - airflow_logs:/opt/airflow/logs
       - airflow_plugins:/opt/airflow/plugins
     networks:
@@ -89,7 +89,7 @@ services:
     ports:
       - "28080:8080"
     volumes:
-      - airflow_dags:/opt/airflow/dags
+      - ./dags:/opt/airflow/dags
       - airflow_logs:/opt/airflow/logs
       - airflow_plugins:/opt/airflow/plugins
 
@@ -110,8 +110,9 @@ volumes:
   simcore_logs:
     # external: true
     name: ${SWARM_STACK_NAME:-simcore}_simcore_log
-  airflow_dags:
-    # external: true
-    name: ${SWARM_STACK_NAME:-simcore}_airflow_dags
+  # airflow_dags:
+  #   # external: true
+  #   name: ${SWARM_STACK_NAME:-simcore}_airflow_dags
+
   airflow_logs:
   airflow_plugins:
