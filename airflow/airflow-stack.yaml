@@ -1,164 +1,117 @@
-# Basic Airflow cluster configuration for CeleryExecutor with Redis and PostgreSQL.
-#
-# WARNING: This configuration is for local development. Do not use it in a production deployment.
-#
-# This configuration supports basic configuration using environment variables or an .env file
-# The following variables are supported:
-#
-# AIRFLOW_IMAGE_NAME         - Docker image name used to run Airflow.
-#                              Default: apache/airflow:master-python3.8
-# AIRFLOW_UID                - User ID in Airflow containers
-#                              Default: 50000
-# AIRFLOW_GID                - Group ID in Airflow containers
-#                              Default: 50000
-# _AIRFLOW_WWW_USER_USERNAME - Username for the administrator account.
-#                              Default: airflow
-# _AIRFLOW_WWW_USER_PASSWORD - Password for the administrator account.
-#                              Default: airflow
-#
-# Feel free to modify this file to suit your needs.
----
-version: "3"
+version: "3.8"
 x-airflow-common: &airflow-common
-  image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.0.1}
+  image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.0.2}
+  init: true
   environment: &airflow-common-env
-    AIRFLOW__CORE__EXECUTOR: CeleryExecutor
-    AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
-    AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
-    AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_USER}:${AIRFLOW_PASSWORD}@airflow-postgres/airflow
+    # AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@airflow-postgres/airflow
+    # AIRFLOW__CELERY__BROKER_URL: redis://:@${REDIS_HOST}:${REDIS_PORT}/1
     AIRFLOW__CORE__FERNET_KEY: ""
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
     AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__API__AUTH_BACKEND: "airflow.api.auth.backend.basic_auth"
     AIRFLOW__CORE__ENABLE_XCOM_PICKLING: "true"
-  volumes: &airflow-common-volumes
-    - ./dags:/opt/airflow/dags
-    - ./logs:/opt/airflow/logs
-    - ./plugins:/opt/airflow/plugins
-  user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
-  # depends_on:
-  #   redis:
-  #     condition: service_healthy
-  #   postgres:
-  #     condition: service_healthy
-
+    # - ./logs:/opt/airflow/logs
+    # - ./plugins:/opt/airflow/plugins
+  user: "${AIRFLOW_UID:-1000}:${AIRFLOW_GID:-0}"
 services:
-  postgres:
+  airflow-adminer:
+    image: adminer:4.8.0
+    init: true
+    environment:
+      - ADMINER_DEFAULT_SERVER=airflow-postgres
+      - ADMINER_DESIGN=nette
+      - ADMINER_PLUGINS=json-column
+    ports:
+      - "18080:8080"
+
+  airflow-postgres:
     image: postgres:13
+    init: true
     environment:
-      POSTGRES_USER: airflow
-      POSTGRES_PASSWORD: airflow
+      POSTGRES_USER: ${AIRFLOW_USER}
+      POSTGRES_PASSWORD: ${AIRFLOW_PASSWORD}
       POSTGRES_DB: airflow
-    volumes:
-      - postgres-db-volume:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "airflow"]
-      interval: 5s
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "--username",
+          "${AIRFLOW_USER}",
+          "--dbname",
+          "airflow",
+        ]
+      interval: 15s
       retries: 5
-    restart: always
-
-  redis:
-    image: redis:latest
-    ports:
-      - "6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 30s
-      retries: 50
-    restart: always
-
-  airflow-webserver:
-    image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.0.1}
-    environment:
-      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
-      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
-      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
-      AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
-      AIRFLOW__CORE__FERNET_KEY: ""
-      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
-      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
-      AIRFLOW__CORE__ENABLE_XCOM_PICKLING: "true"
-    volumes:
-      - ./dags:/opt/airflow/dags
-      - ./logs:/opt/airflow/logs
-      - ./plugins:/opt/airflow/plugins
-    user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
-    command: webserver
-    ports:
-      - 8080:8080
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-    restart: always
+    networks:
+      - default
+    command:
+      [
+        "postgres",
+        "-c",
+        "tcp_keepalives_idle=600",
+        "-c",
+        "tcp_keepalives_interval=600",
+        "-c",
+        "tcp_keepalives_count=5",
+        "-c",
+        "max_connections=413",
+        "-c",
+        "shared_buffers=256MB",
+      ]
 
   airflow-scheduler:
-    image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.0.1}
-    environment:
-      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
-      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
-      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
-      AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
-      AIRFLOW__CORE__FERNET_KEY: ""
-      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
-      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
-      AIRFLOW__CORE__ENABLE_XCOM_PICKLING: "true"
-    volumes:
-      - ./dags:/opt/airflow/dags
-      - ./logs:/opt/airflow/logs
-      - ./plugins:/opt/airflow/plugins
-    user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
-    command: scheduler
-    restart: always
-
-  airflow-worker:
-    image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.0.1}
-    environment:
-      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
-      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
-      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
-      AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
-      AIRFLOW__CORE__FERNET_KEY: ""
-      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
-      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
-      AIRFLOW__CORE__ENABLE_XCOM_PICKLING: "true"
-    user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
-    command: celery worker
-    restart: always
-    volumes:
-      - ./dags:/opt/airflow/dags
-      - ./logs:/opt/airflow/logs
-      - ./plugins:/opt/airflow/plugins
-      - /var/run/docker.sock:/var/run/docker.sock
-      - inputs:/inputs
-      - outputs:/outputs
-      - logs:/logs
-
-  airflow-init:
     <<: *airflow-common
-    command: version
+    command: scheduler
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - airflow_dags:/opt/airflow/dags
+      - airflow_logs:/opt/airflow/logs
+      - airflow_plugins:/opt/airflow/plugins
+    networks:
+      - default
+      - simcore_default
     environment:
       <<: *airflow-common-env
       _AIRFLOW_DB_UPGRADE: "true"
       _AIRFLOW_WWW_USER_CREATE: "true"
-      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
-      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
+      _AIRFLOW_WWW_USER_USERNAME: ${AIRFLOW_USER:-scu}
+      _AIRFLOW_WWW_USER_PASSWORD: ${AIRFLOW_PASSWORD:-adminadmin}
 
-  flower:
+  airflow-webserver:
     <<: *airflow-common
-    command: celery flower
+    command: webserver
+    networks:
+      - default
+      - simcore_default
     ports:
-      - 5555:5555
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:5555/"]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-    restart: always
+      - "28080:8080"
+    volumes:
+      - airflow_dags:/opt/airflow/dags
+      - airflow_logs:/opt/airflow/logs
+      - airflow_plugins:/opt/airflow/plugins
+
+networks:
+  # needed so that airflow is accessible from the director-v2
+  simcore_default:
+    name: ${SWARM_STACK_NAME:-simcore}_default
+    # external: true
 
 volumes:
   postgres-db-volume:
-  inputs:
-  outputs:
-  logs:
+  simcore_inputs:
+    # external: true
+    name: ${SWARM_STACK_NAME:-simcore}_simcore_input
+  simcore_outputs:
+    # external: true
+    name: ${SWARM_STACK_NAME:-simcore}_simcore_output
+  simcore_logs:
+    # external: true
+    name: ${SWARM_STACK_NAME:-simcore}_simcore_log
+  airflow_dags:
+    # external: true
+    name: ${SWARM_STACK_NAME:-simcore}_airflow_dags
+  airflow_logs:
+  airflow_plugins:
