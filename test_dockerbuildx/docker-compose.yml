@@ -1,0 +1,11 @@
+version: "3.9"
+services: 
+  first_service:
+    image: ${LOCAL_REGISTRY}/image:latest
+    build: 
+      dockerfile: ./Dockerfile
+  
+  second_service:
+    image: ${LOCAL_REGISTRY}/image2:latest
+    build: 
+      dockerfile: ./Dockerfile2
