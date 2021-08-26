@@ -1,9 +1,10 @@
 {
-    "python.pythonPath": ".venv/bin/python3",
-    "python.unitTest.pyTestArgs": [
+    "python.pythonPath": "airflow/.venv/bin/python",
+    "python.testing.pytestArgs": [
         "."
     ],
-    "python.unitTest.unittestEnabled": false,
-    "python.unitTest.nosetestsEnabled": false,
-    "python.unitTest.pyTestEnabled": true
+    "python.testing.unittestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.formatting.provider": "black"
 }
