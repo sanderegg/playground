@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  testpythonimage:
+    image: testpythonimage:latest
+
+    init: true
+    build:
+      context: ./
+
+    volumes:
+      - ./data:/test
