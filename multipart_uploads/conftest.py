@@ -15,12 +15,13 @@ def s3_client():
 
 from typing import Any
 
+import os
 
 @pytest.fixture
 def s3_settings() -> dict[str, Any]:
     return {
-        "aws_access_key_id": "",
-        "aws_secret_access_key": "",
+        "aws_access_key_id": os.environ.get("S3_ACCESS_KEY"),
+        "aws_secret_access_key": os.environ.get("S3_SECRET_KEY"),
         "region_name": "us-east-1",
     }
 
