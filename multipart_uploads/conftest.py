@@ -19,8 +19,8 @@ from typing import Any
 @pytest.fixture
 def s3_settings() -> dict[str, Any]:
     return {
-        "aws_access_key_id": "AKIATHZO54NSPQJIWRU3",
-        "aws_secret_access_key": "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",
+        "aws_access_key_id": "",
+        "aws_secret_access_key": "",
         "region_name": "us-east-1",
     }
 
