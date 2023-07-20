@@ -63,12 +63,12 @@ print_info "Log-level app/server: $APP_LOG_LEVEL/$SERVER_LOG_LEVEL"
 
 if [ "${SC_BOOT_MODE}" = "development" ]; then
   print_info $(ls -tlah)
-  exec uvicorn app.app:app \
+  exec uvicorn app.src.app:app \
       --host 0.0.0.0 \
       --reload \
       --log-level ${SERVER_LOG_LEVEL}
 else
-  exec uvicorn app.app:app \
+  exec uvicorn app.src.app:app \
     --host 0.0.0.0 \
     --log-level "${SERVER_LOG_LEVEL}"
 fi
