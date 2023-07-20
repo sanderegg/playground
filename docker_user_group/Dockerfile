@@ -124,3 +124,6 @@ FROM python-build as development
 #
 # development image for local runs, src files shall be mounted
 #
+WORKDIR /devel
+ENV SC_BOOT_MODE=development
+ENV SC_BUILD_TARGET=development

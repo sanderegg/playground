@@ -30,7 +30,7 @@ check_docker_access() {
 print_info "Booting in ${SC_BOOT_MODE} mode ..."
 print_info "User :$(id)"
 print_info "Workdir : $(pwd)"
-print_info
+print_info ""
 print_info "docker engine access...$(check_docker_access)"
 
 #
@@ -46,11 +46,11 @@ if [ "${SC_BUILD_TARGET}" = "development" ]; then
   python --version | sed 's/^/    /'
   command -v python | sed 's/^/    /'
 
-  cd services/autoscaling || exit 1
-  pip --quiet --no-cache-dir install -r requirements/dev.txt
-  cd - || exit 1
+  # cd services/autoscaling || exit 1
+  # pip --quiet --no-cache-dir install -r requirements/dev.txt
+  # cd - || exit 1
   print_info "PIP :"
-  pip list | sed 's/^/    /'
+  pip --no-cache list | sed 's/^/    /'
 fi
 
 #
@@ -64,15 +64,12 @@ print_info "Log-level app/server: $APP_LOG_LEVEL/$SERVER_LOG_LEVEL"
 if [ "${SC_BOOT_MODE}" = "debug-ptvsd" ]; then
   reload_dir_packages=$(find /devel/packages -maxdepth 3 -type d -path "*/src/*" ! -path "*.*" -exec echo '--reload-dir {} \' \;)
 
-  exec sh -c "
-    cd services/autoscaling/src/simcore_service_autoscaling && \
-    uvicorn main:the_app \
+  exec uvicorn app:app \
       --host 0.0.0.0 \
       --reload \
       $reload_dir_packages
       --reload-dir . \
       --log-level \"${SERVER_LOG_LEVEL}\"
-  "
 else
   exec uvicorn app:app \
     --host 0.0.0.0 \
