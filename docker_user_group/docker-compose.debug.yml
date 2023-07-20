@@ -17,4 +17,4 @@ services:
       - 8000:8000
       - 5678:5678
     volumes:
-      - ./services/app:/app
+      - ./services/app:/devel/app
