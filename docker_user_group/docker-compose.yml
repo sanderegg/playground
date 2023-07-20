@@ -1,12 +1,14 @@
-version: '3.4'
+version: '3.8'
 
 services:
   dockerusergroup:
-    image: dockerusergroup
+    image: dockerusergroup:prod
     init: true
+    user: ${UID}:${GID}
     build:
       context: .
       dockerfile: ./Dockerfile
+      target: production
     ports:
       - 8000:8000
     volumes:
