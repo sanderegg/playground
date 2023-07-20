@@ -73,7 +73,7 @@ RUN --mount=type=cache,target=/var/cache/apt,mode=0755,sharing=private \
 
 
 # define entrypoint command
-ENTRYPOINT ["/bin/sh", "/app/docker/boot.sh"]
+ENTRYPOINT ["/bin/sh", "app/docker/boot.sh"]
 
 FROM runtime-dependencies as python-build
 #
@@ -104,15 +104,15 @@ FROM runtime-dependencies as production
 
 
 # copy sources
-WORKDIR /app
-COPY ./services/app /app
+WORKDIR /home/${SC_USER_NAME}
+COPY --chown=${SC_USER_NAME}:${SC_USER_NAME} ./services/app /home/${SC_USER_NAME}/app
 
 
 
 # Copies pre-installed virtualenv and packages from build stage
 COPY --chown=${SC_USER_NAME}:${SC_USER_NAME} --from=python-build  ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
-RUN  chown -R ${SC_USER_NAME} /app
+RUN  chown -R ${SC_USER_NAME} /home/${SC_USER_NAME}/app
 
 USER ${SC_USER_NAME}
 
