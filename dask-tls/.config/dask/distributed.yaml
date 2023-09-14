@@ -1,0 +1,17 @@
+distributed:
+  comm:
+    default-scheme: tls
+    require-encryption: True   # whether to require encryption on non-local comms
+    
+    tls:
+      ca-file: /home/sanderegg/dev/github/playground/dask-tls/myca.pem
+      scheduler:
+        key: /home/sanderegg/dev/github/playground/dask-tls/mykey.pem
+        cert: /home/sanderegg/dev/github/playground/dask-tls/myca.pem
+      worker:
+        key: /home/sanderegg/dev/github/playground/dask-tls/mykey.pem
+        cert: /home/sanderegg/dev/github/playground/dask-tls/myca.pem
+      client:
+        key: /home/sanderegg/dev/github/playground/dask-tls/mykey.pem
+        cert: /home/sanderegg/dev/github/playground/dask-tls/myca.pem
+      
