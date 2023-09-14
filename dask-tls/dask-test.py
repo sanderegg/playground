@@ -43,7 +43,9 @@ if __name__ == "__main__":
 
 
 # NOTES:
+# this works well
 # openssl req -newkey rsa:4096 -nodes -sha256 -x509 -days 3650 -nodes -subj "/C=CH/L=Zurich/CN=osparc.io" -out myca.pem -keyout mykey.pem
+# then the configuration needs to be set in the ~/.config/dask/distributed.yaml file https://docs.dask.org/en/latest/configuration.html
 #
 #
 # perplexity
