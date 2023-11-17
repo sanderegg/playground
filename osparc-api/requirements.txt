@@ -1,4 +1,7 @@
 ipywidgets
 osparc
+pre-commit
+pylint
+ruff
 tenacity
 tqdm
