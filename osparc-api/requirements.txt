@@ -1,7 +1,9 @@
 ipywidgets
+ipykernel
 osparc
 pre-commit
 pylint
+rich
 ruff
 tenacity
 tqdm
