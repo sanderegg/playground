@@ -1,4 +1,6 @@
 # requirements.txt
+bokeh
 dask[distributed]
 pytest
 pytest-asyncio
+jupyter-server-proxy
