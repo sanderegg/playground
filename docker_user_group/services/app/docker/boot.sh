@@ -19,17 +19,17 @@ print_info() {
 check_docker_access() {
   # Run the "docker version" command inside command substitution
   if docker_version_output=$(docker version 2>/dev/null); then
-    echo "yes"
+    echo "yes: $docker_version_output"
   else
     echo "no"
   fi
 }
 
-
-
 print_info "Booting in ${SC_BOOT_MODE} mode ..."
+print_info "Hostname : $(hostname)"
 print_info "User :$(id)"
 print_info "Workdir : $(pwd)"
+print_info "Dir contents : $(ls -tlah)"
 print_info ""
 print_info "docker engine access...$(check_docker_access)"
 
@@ -64,9 +64,9 @@ print_info "Log-level app/server: $APP_LOG_LEVEL/$SERVER_LOG_LEVEL"
 if [ "${SC_BOOT_MODE}" = "development" ]; then
   print_info $(ls -tlah)
   exec uvicorn app.src.app:app \
-      --host 0.0.0.0 \
-      --reload \
-      --log-level ${SERVER_LOG_LEVEL}
+    --host 0.0.0.0 \
+    --reload \
+    --log-level ${SERVER_LOG_LEVEL}
 else
   exec uvicorn app.src.app:app \
     --host 0.0.0.0 \
