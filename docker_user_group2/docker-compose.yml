@@ -1,0 +1,10 @@
+version: '3.4'
+
+services:
+  dockerusergroup2:
+    image: dockerusergroup2
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - 8000:8000
