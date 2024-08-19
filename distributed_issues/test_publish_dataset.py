@@ -55,7 +55,9 @@ async def dask_spec_local_cluster(
 @pytest.fixture
 async def dask_client(dask_spec_local_cluster: SpecCluster) -> AsyncIterator[Client]:
     async with Client(
-        dask_spec_local_cluster.scheduler_address, asynchronous=True, set_as_default=True
+        dask_spec_local_cluster.scheduler_address,
+        asynchronous=True,
+        set_as_default=True,
     ) as client:
         client.as_current()
         yield client
@@ -79,10 +81,10 @@ async def test_submit_future_with_resources(dask_client: Client):
     assert await coro == {"resources": RESOURCES}
 
 
-# async def test_submit_future_with_resources_and_published_dataset(dask_client: Client):
-#     future = dask_client.submit(_retrieve_annotations, resources=RESOURCES)
-#     assert future
-#     await dask_client.publish_dataset(future, name="myfuture")
-#     coro = future.result()
-#     assert isinstance(coro, Coroutine)
-#     assert await coro == {"resources": RESOURCES}
+async def test_submit_future_with_resources_and_published_dataset(dask_client: Client):
+    future = dask_client.submit(_retrieve_annotations, resources=RESOURCES)
+    assert future
+    await dask_client.publish_dataset(future, name="myfuture")
+    coro = future.result()
+    assert isinstance(coro, Coroutine)
+    assert await coro == {"resources": RESOURCES}

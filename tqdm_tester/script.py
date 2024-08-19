@@ -1,16 +1,31 @@
+import asyncio
 from tqdm import tqdm
-from time import sleep
-import logging
-from tqdm.contrib.logging import logging_redirect_tqdm
+import enlighten
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+manager = enlighten.get_manager()
+DOWNLOAD_TIME = 5
+EXTRACTING_TIME = 10
 
-NUM = 1000
 
-with logging_redirect_tqdm(), tqdm(total=NUM, desc="I am a progress bar") as pbar:
-    for i in range(NUM):
-        sleep(0.005)
-        diplayed = pbar.update(1)
-        if diplayed:
-            logger.info("hey there %s, %s", i, f"{pbar}")
+async def pull_image(image_id: int):
+    # download
+    for i in tqdm(
+        range(DOWNLOAD_TIME), desc=f"downloading {image_id=}", position=1, leave=False
+    ):
+        await asyncio.sleep(1)
+
+    for i in tqdm(
+        range(EXTRACTING_TIME), desc=f"extracting {image_id=}", position=1, leave=False
+    ):
+        await asyncio.sleep(1)
+
+
+NUM_IMAGES = 3
+
+
+async def pull_images():
+    for i in tqdm(range(NUM_IMAGES), desc=f"pulling {NUM_IMAGES} images", position=0):
+        await pull_image(i)
+
+
+asyncio.run(pull_images())

@@ -1,0 +1,30 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'federate-ec2'
+    honor_labels: true
+    metrics_path: '/federate'
+    params:
+      'match[]':
+        - '{job=~"^.+$"}'
+    ec2_sd_configs:
+      - region: us-east-2
+        access_key: "******"
+        secret_key: "********"
+        # profile: "<aws_profile>" # optional, if using instance role or profile
+        port: 9090
+        # You can filter by tags, instance IDs, or other attributes to only discover the specific Prometheus instances
+        filters:
+          - name: "tag:autoscaling"
+            values: ["computational"]
+
+    relabel_configs:
+      - source_labels: [__meta_ec2_public_dns_name] # or use __meta_ec2_instance_id, __meta_ec2_private_ip depending on your network setup
+        target_label: __address__
+        replacement: "${1}:9090" # Assumes Prometheus is running on port 9090
+
+      # Apply additional relabeling here as needed, for example:
+      # Map the EC2 instance ID to a label
+      - source_labels: [__meta_ec2_instance_id]
+        target_label: instance_id
