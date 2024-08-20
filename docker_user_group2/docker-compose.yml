@@ -1,10 +1,16 @@
 version: '3.4'
 
 services:
-  dockerusergroup2:
-    image: dockerusergroup2
+  fake-sidecar:
+    image: fake-sidecar
     build:
       context: .
       dockerfile: ./Dockerfile
     ports:
       - 8000:8000
+    volumes:
+      - shared_computational_data:/shared_computational_data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+volumes:
+  shared_computational_data:
