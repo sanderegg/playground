@@ -13,6 +13,11 @@ services:
         target: /etc/prometheus/prometheus.yml
       - source: prometheus-web-config
         target: /etc/prometheus/web.yml
+    secrets:
+      - source: prometheus-cert
+        target: /etc/prometheus/prometheus-cert.pem
+      - source: prometheus-key
+        target: /etc/prometheus/prometheus-key.pem
     volumes:
       - prometheus-data:/prometheus
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -31,6 +36,11 @@ configs:
     file: ./prometheus.yml
   prometheus-web-config:
     file: ./web.yml
+secrets:
+  prometheus-cert:
+    file: ./.dask-certificates/dask-cert.pem
+  prometheus-key:
+    file: ./.dask-certificates/dask-key.pem
     
 volumes:
   prometheus-data:

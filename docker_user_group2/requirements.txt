@@ -1,3 +1,4 @@
+docker
 fastapi
 redis
 types-redis
