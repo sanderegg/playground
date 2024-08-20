@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
-
+import docker
+import docker.errors
 from models import ItemPayload
 
 app = FastAPI()
@@ -68,3 +69,32 @@ def remove_quantity(item_id: int, quantity: int) -> dict[str, str]:
     else:
         grocery_list[item_id].quantity -= quantity
     return {"result": f"{quantity} items removed."}
+
+
+
+@app.post("/sleeper")
+def run_sleeper(number_of_seconds: int) -> dict[str, str]:
+    client = docker.from_env()
+    
+    try:
+        # Run the container and capture the logs
+        container = client.containers.run(
+            "sleeper:latest",
+            command=str(number_of_seconds),
+            auto_remove=True,
+            detach=True
+        )
+        
+        # Wait for the container to finish
+        result = container.wait()
+        
+        if result["StatusCode"] != 0:
+            stderr_logs = container.logs(stderr=True).decode("utf-8")
+            raise HTTPException(status_code=500, detail=f"Container error: {stderr_logs}")
+        
+        # Capture the logs (stdout) from the container
+        stdout_logs = container.logs(stdout=True).decode("utf-8")
+        
+        return {"stdout": stdout_logs}
+    except docker.errors.DockerException as e:
+        raise HTTPException(status_code=500, detail=f"Docker error: {e}")

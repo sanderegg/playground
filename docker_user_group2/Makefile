@@ -1,8 +1,10 @@
 build:
 	docker compose build
+	$(MAKE) -C sleeper build
 
 build-devel:
 	docker compose -f docker-compose.yml -f docker-compose.debug.yml build
+	$(MAKE) -C sleeper build
 
 up-standard:
 	docker compose up
