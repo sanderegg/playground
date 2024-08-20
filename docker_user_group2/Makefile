@@ -8,6 +8,7 @@ build-devel:
 
 up-standard:
 	docker compose up
+	# open http://127.0.0.1:8000/doc
 
 # up:
 # 	UID=$(shell id -u) GID=$(shell id -g) GID=$(shell getent group docker | cut -d: -f3) docker compose up
