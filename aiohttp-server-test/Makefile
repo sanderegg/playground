@@ -1,4 +1,4 @@
-.PHONY: setup lint format test docker-build docker-up docker-down docker-logs clean help benchmark locust-test
+.PHONY: setup lint format test docker-build docker-up docker-down docker-logs clean help benchmark locust-test locust-web
 
 # Default target
 .DEFAULT_GOAL := help
@@ -86,6 +86,11 @@ locust-test: ## Run Locust load tests on all server implementations
 	@echo "$(YELLOW)Running Locust load tests...$(NC)"
 	cd locust_tests && ./compare_servers.sh
 	@echo "$(GREEN)Load tests complete! Check locust_tests/results for detailed reports.$(NC)"
+
+locust-web: ## Run Locust with web UI for interactive load testing
+	@echo "$(YELLOW)Starting Locust web interface...$(NC)"
+	@echo "$(YELLOW)Open http://localhost:8089/ in your browser to configure and run tests.$(NC)"
+	cd locust_tests && locust -f locustfile.py
 
 venv: ## Create a virtual environment using UV
 	@echo "$(YELLOW)Creating virtual environment...$(NC)"
