@@ -1,4 +1,4 @@
-.PHONY: setup lint format test docker-build docker-up docker-down docker-logs clean help benchmark locust-test locust-web
+.PHONY: setup lint format test docker-build docker-up docker-down docker-logs clean help benchmark locust-test locust-web max-rps
 
 # Default target
 .DEFAULT_GOAL := help
@@ -94,6 +94,11 @@ locust-web: ## Run Locust with web UI for interactive load testing
 	echo "$(YELLOW)Open http://localhost:8089/ in your browser to run tests.$(NC)"; \
 	echo "$(YELLOW)Host field will be prefilled with http://$$IP:8080$(NC)"; \
 	cd locust_tests && locust --host="http://$$IP:8080" -f locustfile.py
+
+max-rps: ## Find maximum sustainable request rate for all server implementations
+	@echo "$(YELLOW)Finding maximum sustainable request rate for all servers...$(NC)"
+	cd locust_tests && ./find_max_rps.py
+	@echo "$(GREEN)Test complete! Check locust_tests/results/max_rps_* directory for results.$(NC)"
 
 venv: ## Create a virtual environment using UV
 	@echo "$(YELLOW)Creating virtual environment...$(NC)"
