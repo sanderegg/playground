@@ -89,8 +89,11 @@ locust-test: ## Run Locust load tests on all server implementations
 
 locust-web: ## Run Locust with web UI for interactive load testing
 	@echo "$(YELLOW)Starting Locust web interface...$(NC)"
-	@echo "$(YELLOW)Open http://localhost:8089/ in your browser to configure and run tests.$(NC)"
-	cd locust_tests && locust -f locustfile.py
+	@IP=$$(hostname -I | awk '{print $$1}'); \
+	echo "$(YELLOW)Detected local IP: $$IP$(NC)"; \
+	echo "$(YELLOW)Open http://localhost:8089/ in your browser to run tests.$(NC)"; \
+	echo "$(YELLOW)Host field will be prefilled with http://$$IP:8080$(NC)"; \
+	cd locust_tests && locust --host="http://$$IP:8080" -f locustfile.py
 
 venv: ## Create a virtual environment using UV
 	@echo "$(YELLOW)Creating virtual environment...$(NC)"

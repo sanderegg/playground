@@ -1,25 +1,29 @@
 #!/bin/bash
 # Script to run a comparison test against all three server implementations
 
+# Get the local IP address
+LOCAL_IP=$(hostname -I | awk '{print $1}')
+echo "Using local IP address: $LOCAL_IP"
+
 # Make sure all three servers are running
 echo "Checking if all three servers are running..."
 
 # Check simple server (port 8080)
-if ! curl -s http://localhost:8080/health > /dev/null; then
+if ! curl -s http://${LOCAL_IP}:8080/health >/dev/null; then
     echo "Error: Simple server not running on port 8080!"
     echo "Please start all servers with 'make docker-up' before running this test."
     exit 1
 fi
 
 # Check gunicorn server (port 8081)
-if ! curl -s http://localhost:8081/health > /dev/null; then
+if ! curl -s http://${LOCAL_IP}:8081/health >/dev/null; then
     echo "Error: Gunicorn server not running on port 8081!"
     echo "Please start all servers with 'make docker-up' before running this test."
     exit 1
 fi
 
 # Check gunicorn-uvloop server (port 8082)
-if ! curl -s http://localhost:8082/health > /dev/null; then
+if ! curl -s http://${LOCAL_IP}:8082/health >/dev/null; then
     echo "Error: Gunicorn+uvloop server not running on port 8082!"
     echo "Please start all servers with 'make docker-up' before running this test."
     exit 1
