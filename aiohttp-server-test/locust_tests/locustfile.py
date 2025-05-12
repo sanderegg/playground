@@ -12,7 +12,7 @@ Tests only the root endpoint (/) for simplicity.
 
 import socket
 
-from locust import HttpUser, between, task
+from locust import FastHttpUser, task
 
 
 # Get local IP address dynamically
@@ -34,37 +34,9 @@ def get_local_ip():
 LOCAL_IP = get_local_ip()
 
 
-class SimpleServerUser(HttpUser):
-    """User that tests the simple AIOHTTP server on port 8080."""
-
-    host = f"http://{LOCAL_IP}:8080"
-    wait_time = between(0.1, 0.3)  # Wait between 100ms and 300ms between tasks
+class RootCallUser(FastHttpUser):
 
     @task
     def get_root(self):
         """Test the root endpoint (/)."""
-        self.client.get("/", name="Simple Server - Root")
-
-
-class GunicornServerUser(HttpUser):
-    """User that tests the Gunicorn AIOHTTP server on port 8081."""
-
-    host = f"http://{LOCAL_IP}:8081"
-    wait_time = between(0.1, 0.3)  # Wait between 100ms and 300ms between tasks
-
-    @task
-    def get_root(self):
-        """Test the root endpoint (/)."""
-        self.client.get("/", name="Gunicorn Server - Root")
-
-
-class GunicornUvloopServerUser(HttpUser):
-    """User that tests the Gunicorn AIOHTTP server with uvloop on port 8082."""
-
-    host = f"http://{LOCAL_IP}:8082"
-    wait_time = between(0.1, 0.3)  # Wait between 100ms and 300ms between tasks
-
-    @task
-    def get_root(self):
-        """Test the root endpoint (/)."""
-        self.client.get("/", name="Gunicorn+uvloop Server - Root")
+        self.client.get("/", name="Root")
