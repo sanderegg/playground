@@ -7,6 +7,7 @@
 BLUE=\033[0;34m
 GREEN=\033[0;32m
 YELLOW=\033[0;33m
+RED=\033[0;31m
 NC=\033[0m # No Color
 
 help: ## Show this help
@@ -73,10 +74,7 @@ clean: ## Remove build artifacts and caches
 benchmark: ## Run benchmarks for all server implementations
 	@echo "$(YELLOW)Running benchmarks...$(NC)"
 	@echo "Benchmarking simple server on port 8080..."
-	@if ! command -v hey &> /dev/null; then \
-		echo "$(YELLOW)'hey' not found. Please install it first: go install github.com/rakyll/hey@latest$(NC)"; \
-		exit 1; \
-	fi
+
 	hey -n 10000 -c 100 http://localhost:8080/
 	@echo "\nBenchmarking gunicorn server on port 8081..."
 	hey -n 10000 -c 100 http://localhost:8081/
