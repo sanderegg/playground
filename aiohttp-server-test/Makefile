@@ -1,4 +1,4 @@
-.PHONY: setup lint format test docker-build docker-up docker-down docker-logs clean help benchmark
+.PHONY: setup lint format test docker-build docker-up docker-down docker-logs clean help benchmark locust-test
 
 # Default target
 .DEFAULT_GOAL := help
@@ -81,6 +81,11 @@ benchmark: ## Run benchmarks for all server implementations
 	@echo "\nBenchmarking gunicorn-uvloop server on port 8082..."
 	hey -n 10000 -c 100 http://localhost:8082/
 	@echo "$(GREEN)Benchmarks complete!$(NC)"
+
+locust-test: ## Run Locust load tests on all server implementations
+	@echo "$(YELLOW)Running Locust load tests...$(NC)"
+	cd locust_tests && ./compare_servers.sh
+	@echo "$(GREEN)Load tests complete! Check locust_tests/results for detailed reports.$(NC)"
 
 venv: ## Create a virtual environment using UV
 	@echo "$(YELLOW)Creating virtual environment...$(NC)"
