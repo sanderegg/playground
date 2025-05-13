@@ -2,41 +2,41 @@
 """
 Simple Locust test file for benchmarking AIOHTTP server implementations.
 
-This file defines user behaviors for testing the three different AIOHTTP server implementations:
-- Simple AIOHTTP server (port 8080)
-- Gunicorn with AIOHTTP workers (port 8081)
-- Gunicorn with AIOHTTP workers and uvloop (port 8082)
 
-Tests only the root endpoint (/) for simplicity.
 """
 
-import socket
+import os
 
-from locust import FastHttpUser, task
+from locust import HttpUser, task
 
-
-# Get local IP address dynamically
-def get_local_ip():
-    try:
-        # Create a socket connection to an external server to determine local IP
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        # Doesn't actually connect but gives us the IP that would be used
-        s.connect(("8.8.8.8", 80))
-        ip = s.getsockname()[0]
-        s.close()
-        return ip
-    except Exception:
-        # Fallback to localhost if unable to determine IP
-        return "localhost"
+_AUTH = (os.environ.get("SC_USER_NAME"), os.environ.get("SC_USER_PASSWORD"))
 
 
-# Local IP address to be used for all hosts
-LOCAL_IP = get_local_ip()
-
-
-class RootCallUser(FastHttpUser):
+class RootCallUser(HttpUser):
 
     @task
-    def get_root(self):
-        """Test the root endpoint (/)."""
-        self.client.get("/", name="Root")
+    def get_root(self) -> None:
+        self.client.get("/", name="Root", auth=_AUTH)
+
+    @task
+    def get_v0_entrypoint(self) -> None:
+        self.client.get("/v0/", name="v0", auth=_AUTH)
+
+    @task(10)
+    def get_auth_check(self) -> None:
+        self.client.get("/v0/auth:check", name="auth-check", auth=_AUTH)
+
+    def on_start(self) -> None:
+        response = self.client.post(
+            "/v0/auth/login",
+            json={
+                "email": os.environ.get("OSPARC_USERNAME"),
+                "password": os.environ.get("OSPARC_PASSWORD"),
+            },
+            name="auth-login",
+            auth=_AUTH,
+        )
+        response.raise_for_status()
+
+    def on_stop(self) -> None:
+        self.client.post("/v0/auth/logout", name="auth-logout", auth=_AUTH)

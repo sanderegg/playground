@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import asyncio
 import logging
 
 from aiohttp import web
@@ -8,10 +9,9 @@ _logger = logging.getLogger(__name__)
 
 
 async def handle(request):
+    await asyncio.sleep(0)  # Simulate some processing delay
     name = request.match_info.get("name", "Anonymous")
-    return web.Response(
-        text=f"Hello, {name} from gunicorn with aiohttp workers and uvloop!"
-    )
+    return web.Response(text=f"Hello, {name} from aiohttp!")
 
 
 async def health_check(request):
