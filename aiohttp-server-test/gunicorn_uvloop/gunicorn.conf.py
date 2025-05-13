@@ -20,3 +20,4 @@ worker_class = "aiohttp.GunicornUVLoopWebWorker"
 accesslog = "-"
 errorlog = "-"
 reload = True
+worker_tmp_dir = "/dev/shm"
