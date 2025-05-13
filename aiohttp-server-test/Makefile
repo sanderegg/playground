@@ -39,22 +39,22 @@ test: ## Run tests (add your test command here)
 	# Add your test command here (e.g., pytest)
 	@echo "$(GREEN)Tests completed!$(NC)"
 
-docker-build: ## Build all Docker containers
+build: ## Build all Docker containers
 	@echo "$(YELLOW)Building Docker containers...$(NC)"
 	docker compose build
 	@echo "$(GREEN)Build complete!$(NC)"
 
-docker-up: ## Start all Docker containers
+up: ## Start all Docker containers
 	@echo "$(YELLOW)Starting Docker containers...$(NC)"
 	docker compose up -d
 	@echo "$(GREEN)Containers are running!$(NC)"
 
-docker-down: ## Stop all Docker containers
+down: ## Stop all Docker containers
 	@echo "$(YELLOW)Stopping Docker containers...$(NC)"
 	docker compose down
 	@echo "$(GREEN)Containers stopped!$(NC)"
 
-docker-logs: ## View Docker container logs
+logs: ## View Docker container logs
 	@echo "$(YELLOW)Showing Docker logs...$(NC)"
 	docker compose logs -f
 
