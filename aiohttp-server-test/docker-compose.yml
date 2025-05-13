@@ -58,23 +58,3 @@ services:
       start_period: 10s
     volumes:
       - ./common/aiohttp_app.py:/app/aiohttp_app.py
-
-  granian:
-    build:
-      context: ./granian
-    ports:
-      - "8083:8080"
-    environment:
-      - CPU_LIMIT=2
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-    volumes:
-      - ./common/aiohttp_app.py:/app/aiohttp_app.py
