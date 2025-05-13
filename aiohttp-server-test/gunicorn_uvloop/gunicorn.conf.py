@@ -19,3 +19,4 @@ print(f"Setting {workers} worker processes", file=sys.stderr)
 worker_class = "aiohttp.GunicornUVLoopWebWorker"
 accesslog = "-"
 errorlog = "-"
+reload = True

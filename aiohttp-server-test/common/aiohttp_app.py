@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 
+import logging
+
 from aiohttp import web
+
+_logger = logging.getLogger(__name__)
 
 
 async def handle(request):
@@ -23,7 +27,12 @@ def create_app():
             web.get("/{name}", handle),
         ]
     )
+    _logger.info("Aiohttp app created")
     return app
 
 
 app = create_app()
+
+
+if __name__ == "__main__":
+    web.run_app(app, host="0.0.0.0", port=8080)

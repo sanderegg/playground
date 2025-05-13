@@ -1,11 +1,10 @@
 FROM python:3.11-slim
 
 WORKDIR /app
-VOLUME [ "/app/server" ]
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 
 EXPOSE 8080
 
-CMD ["python", "/app/server/aiohttp_app.py"]
+CMD ["python", "aiohttp_app.py"]
