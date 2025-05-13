@@ -1,4 +1,3 @@
-# filepath: /home/anderegg/dev/github/playground/aiohttp-server-test/gunicorn_uvloop/uvloop_server.py
 #!/usr/bin/env python3
 
 from aiohttp import web
