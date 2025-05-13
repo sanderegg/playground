@@ -39,17 +39,3 @@ repos:
     rev: v3.0.1
     hooks:
     -   id: docker-compose-check
-
--   repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.7.3
-    hooks:
-        # Compile requirements
-      - id: pip-compile
-        name: pip-compile requirements.in
-        args: [requirements.in, -o, requirements.txt]
-        files: ^simple/requirements.in$
-        # Compile requirements
-      - id: pip-compile
-        name: pip-compile requirements-dev.in
-        args: [requirements-dev.in, -o, requirements-dev.txt]
-        files: ^requirements-dev\.(in|txt)$
