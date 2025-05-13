@@ -5,7 +5,6 @@ VOLUME [ "/app/server" ]
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY simple_server.py .
 
 EXPOSE 8080
 
