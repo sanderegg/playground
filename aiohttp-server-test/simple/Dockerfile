@@ -8,4 +8,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 8080
 
-CMD ["python", "/app/server/simple_server.py"]
+CMD ["python", "/app/server/aiohttp_app.py"]
