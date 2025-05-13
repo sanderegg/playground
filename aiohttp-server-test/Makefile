@@ -93,7 +93,7 @@ locust-web: ## Run Locust with web UI for interactive load testing
 	echo "$(YELLOW)Detected local IP: $$IP$(NC)"; \
 	echo "$(YELLOW)Open http://localhost:8089/ in your browser to run tests.$(NC)"; \
 	echo "$(YELLOW)Host field will be prefilled with http://$$IP:8080$(NC)"; \
-	cd locust_tests && locust --host="http://$$IP:8080" -f locustfile.py
+	cd locust_tests && locust --processes 4 --host="http://$$IP:8080" -f locustfile.py
 
 max-rps: ## Find maximum sustainable request rate for all server implementations
 	@echo "$(YELLOW)Finding maximum sustainable request rate for all servers...$(NC)"
