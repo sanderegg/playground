@@ -95,6 +95,14 @@ locust-web: ## Run Locust with web UI for interactive load testing
 	echo "$(YELLOW)Host field will be prefilled with http://$$IP:8080$(NC)"; \
 	cd locust_tests && locust --processes 4 --host="http://$$IP:8080" -f locustfile.py
 
+locust-web-simple: ## Run Locust only hitting / with web UI for interactive load testing
+	@echo "$(YELLOW)Starting Locust web interface...$(NC)"
+	@IP=$$(hostname -I | awk '{print $$1}'); \
+	echo "$(YELLOW)Detected local IP: $$IP$(NC)"; \
+	echo "$(YELLOW)Open http://localhost:8089/ in your browser to run tests.$(NC)"; \
+	echo "$(YELLOW)Host field will be prefilled with http://$$IP:8080$(NC)"; \
+	cd locust_tests && locust --processes 4 --host="http://$$IP:8080" -f locustfile_root.py
+
 max-rps: ## Find maximum sustainable request rate for all server implementations
 	@echo "$(YELLOW)Finding maximum sustainable request rate for all servers...$(NC)"
 	cd locust_tests && ./find_max_rps.py
