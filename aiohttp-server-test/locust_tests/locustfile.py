@@ -24,6 +24,7 @@ class RootCallUser(HttpUser):
 
     @task(10)
     def get_auth_check(self) -> None:
+        # This entrypoint uses the DB at least 2x times, sometimes 3x
         self.client.get("/v0/auth:check", name="auth-check", auth=_AUTH)
 
     def on_start(self) -> None:
