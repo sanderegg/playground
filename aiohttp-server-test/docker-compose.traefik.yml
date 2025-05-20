@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v3.4
+    command:
+      - --api.insecure=true
+      - --providers.docker=true
+      - --entrypoints.web.address=:80
+    ports:
+      - "8088:80"   # Traefik dashboard/API
+      - "8089:8080" # Traefik web entrypoint
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - gunicorn-uvloop-traefik
+
+  gunicorn-uvloop-traefik:
+    build:
+      context: ./gunicorn_uvloop
+    environment:
+      - CPU_LIMIT=2
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gunicorn-uvloop.rule=Host(`localhost`) && PathPrefix(`/gunicorn-uvloop`)"
+      - "traefik.http.services.gunicorn-uvloop.loadbalancer.server.port=8080"
+      - "traefik.http.routers.gunicorn-uvloop.entrypoints=web"
+      - "traefik.http.middlewares.gunicorn-uvloop-stripprefix.stripprefix.prefixes=/gunicorn-uvloop"
+      - "traefik.http.routers.gunicorn-uvloop.middlewares=gunicorn-uvloop-stripprefix"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    volumes:
+      - ./common/aiohttp_app.py:/app/aiohttp_app.py
+    expose:
+      - "8080"
